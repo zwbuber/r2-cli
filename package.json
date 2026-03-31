@@ -1,0 +1,46 @@
+{
+  "name": "@round2ai/r2-cli",
+  "version": "1.0.0",
+  "description": "R2-CLI，向 AI 开放二手潮奢交易全链路能力",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "bin": {
+    "r2": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "package.json",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "nodemon --exec ts-node src/index.ts"
+  },
+  "keywords": [
+    "round2ai",
+    "r2-cli",
+    "cli",
+    "ai",
+    "fashion",
+    "luxury",
+    "second-hand"
+  ],
+  "author": "Round2AI - PURESNAKE Team",
+  "license": "MIT",
+  "repository": "https://github.com/Round2AI/r2-cli",
+  "dependencies": {
+    "commander": "^14.0.3",
+    "fs-extra": "^11.3.4",
+    "chalk": "^5.3.0",
+    "inquirer": "^9.2.19"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^25.5.0",
+    "@types/inquirer": "^9.0.7",
+    "nodemon": "^3.0.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.2"
+  }
+}
