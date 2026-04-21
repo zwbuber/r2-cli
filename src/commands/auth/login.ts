@@ -99,8 +99,7 @@ class LoginService {
 
       throw new AuthError("登录失败: 未获取到凭证");
     } catch (error) {
-
-      console.log('error', error);
+      console.log("error", error);
       console.log(chalk.red("\n❌ 登录失败\n"));
 
       // 重新抛出错误，让上层处理

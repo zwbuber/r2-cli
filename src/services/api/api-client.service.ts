@@ -9,7 +9,7 @@ import type { GenerateQRCodeData, QRCodeStatusData } from "../../types/auth.js";
 /**
  * API 基础地址 - 构建时通过 esbuild --define 替换
  */
-const R2_API_URL = "https://api.puresnake.com";
+const R2_API_URL = "https://api.qiuxietang.com";
 
 /**
  * API 客户端服务实现
@@ -24,7 +24,6 @@ export class ApiClientService implements IApiClient {
       version: config.version ?? "v3",
       debug: config.debug ?? false,
     };
-    console.log("this.config", this.config);
   }
 
   /**
