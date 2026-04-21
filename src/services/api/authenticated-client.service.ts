@@ -15,9 +15,6 @@ export class AuthenticatedApiClient {
     this.client = new ApiClientService();
   }
 
-  /**
-   * 确保已加载 token，未登录则抛出 AuthError
-   */
   private async ensureAuthenticated(): Promise<void> {
     if (this.tokenLoaded && this.client.isTokenSet()) return;
 
@@ -32,9 +29,6 @@ export class AuthenticatedApiClient {
     this.tokenLoaded = true;
   }
 
-  /**
-   * 401 后清除本地凭证，提示重新登录
-   */
   private async onAuthExpired(): Promise<void> {
     this.tokenLoaded = false;
     this.client.setToken(null);
@@ -42,10 +36,10 @@ export class AuthenticatedApiClient {
     await storage.clearCredentials();
   }
 
-  async get<T = unknown>(path: string, params?: URLSearchParams): Promise<T> {
+  private async withAuthRefresh<T>(fn: () => Promise<T>): Promise<T> {
     await this.ensureAuthenticated();
     try {
-      return await this.client.get<T>(path, params);
+      return await fn();
     } catch (error) {
       if (error instanceof AuthError) {
         await this.onAuthExpired();
@@ -53,44 +47,21 @@ export class AuthenticatedApiClient {
       }
       throw error;
     }
+  }
+
+  async get<T = unknown>(path: string, params?: URLSearchParams): Promise<T> {
+    return this.withAuthRefresh(() => this.client.get<T>(path, params));
   }
 
   async post<T = unknown>(path: string, body?: unknown): Promise<T> {
-    await this.ensureAuthenticated();
-    try {
-      return await this.client.post<T>(path, body);
-    } catch (error) {
-      if (error instanceof AuthError) {
-        await this.onAuthExpired();
-        throw new AuthError("登录已过期，请运行 r2 auth login 重新登录");
-      }
-      throw error;
-    }
+    return this.withAuthRefresh(() => this.client.post<T>(path, body));
   }
 
   async put<T = unknown>(path: string, body?: unknown): Promise<T> {
-    await this.ensureAuthenticated();
-    try {
-      return await this.client.put<T>(path, body);
-    } catch (error) {
-      if (error instanceof AuthError) {
-        await this.onAuthExpired();
-        throw new AuthError("登录已过期，请运行 r2 auth login 重新登录");
-      }
-      throw error;
-    }
+    return this.withAuthRefresh(() => this.client.put<T>(path, body));
   }
 
   async delete<T = unknown>(path: string): Promise<T> {
-    await this.ensureAuthenticated();
-    try {
-      return await this.client.delete<T>(path);
-    } catch (error) {
-      if (error instanceof AuthError) {
-        await this.onAuthExpired();
-        throw new AuthError("登录已过期，请运行 r2 auth login 重新登录");
-      }
-      throw error;
-    }
+    return this.withAuthRefresh(() => this.client.delete<T>(path));
   }
 }

@@ -12,8 +12,26 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.dirname(__dirname);
 
-// API URL 配置
-const apiUrl = process.env.R2_API_URL || 'https://api.qiuxietang.com';
+// 从 .env 文件加载配置
+function loadEnvFile(filePath) {
+  try {
+    const content = fs.readFileSync(filePath, 'utf-8');
+    const vars = {};
+    for (const line of content.split('\n')) {
+      const match = line.match(/^\s*([A-Z_]+)\s*=\s*'?([^']*)'?\s*$/);
+      if (match) vars[match[1]] = match[2];
+    }
+    return vars;
+  } catch {
+    return {};
+  }
+}
+
+const nodeEnv = process.env.NODE_ENV || 'development';
+const isProd = nodeEnv === 'production';
+const envFile = isProd ? '.env.production' : '.env';
+const env = loadEnvFile(path.join(rootDir, envFile));
+const apiUrl = process.env.R2_API_URL || env.SERVER_BASEURL || 'https://api.qiuxietang.com';
 
 // 入口点配置
 const entryPoints = {
@@ -25,8 +43,8 @@ const esbuildConfig = {
   bundle: true,
   platform: 'node',
   format: 'esm',
-  sourcemap: true,
-  minify: process.env.NODE_ENV === 'production',
+  sourcemap: !isProd,
+  minify: isProd,
   external: [
     'commander',
     'chalk',
@@ -42,6 +60,7 @@ const esbuildConfig = {
     'open',
     'qrcode-terminal',
     'mammoth',
+    'ora',
     'react',
     'ink',
     'react-dom',
@@ -53,7 +72,7 @@ const esbuildConfig = {
     js: '"use strict";',
   },
   define: {
-    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production'),
+    'process.env.NODE_ENV': JSON.stringify(nodeEnv),
     'process.env.R2_API_URL': JSON.stringify(apiUrl),
   },
   treeShaking: true,

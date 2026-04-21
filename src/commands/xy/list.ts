@@ -38,6 +38,10 @@ export function createListCommand(): Command {
         : "";
 
       console.log(chalk.cyan(`\n寄售商品列表${statusFilter} (共 ${result.total} 条):\n`));
+      console.log(
+        chalk.gray("  " + "状态".padEnd(6) + "名称".padEnd(30) + "货号".padEnd(16) + "规格".padEnd(10) + "售价".padStart(8) + "  闲鱼状态"),
+      );
+      console.log(chalk.gray("  " + "─".repeat(80)));
 
       for (const item of result.items) {
         displayGoodsItem(item);
@@ -51,31 +55,25 @@ export function createListCommand(): Command {
 }
 
 function displayGoodsItem(item: SellerGoodsItem): void {
-  const typeTag = item.saleType === "hang" ? "挂售" : item.saleType === "send" ? "寄售" : "";
-  console.log(
-    chalk.white(`  [${item.statusName}] `) +
-    chalk.bold(item.name ?? ""),
-  );
-  console.log(
-    chalk.gray(`    ID: ${item.id}  货号: ${item.goodsNo || "-"}  规格: ${item.size || "-"}  `) +
-    chalk.green(`¥${item.price}`) +
-    (typeTag ? chalk.gray(`  [${typeTag}]`) : ""),
-  );
-
-  if (item.xySaleChannel) {
-    const xyStatus = item.xySaleChannel.sold === 1
+  const xyStatus = item.xySaleChannel
+    ? item.xySaleChannel.sold === 1
       ? "已出售"
       : item.xySaleChannel.status === "on"
         ? "已上架"
-        : "已下架";
-    console.log(
-      chalk.gray(`    闲鱼: [${xyStatus}]  售价: ¥${item.xySaleChannel.price}`),
-    );
-  }
+        : "已下架"
+    : item.status === "wait"
+      ? chalk.yellow("待上架")
+      : "-";
 
-  if (item.status === "wait" && !item.xySaleChannel) {
-    console.log(chalk.yellow(`    → 运行 r2 xy up ${item.id} 上架到闲鱼`));
-  }
+  const xyPrice = item.xySaleChannel ? `¥${item.xySaleChannel.price}` : "";
 
-  console.log();
+  console.log(
+    chalk.white(`  ${item.statusName.padEnd(6)}`) +
+    chalk.bold((item.name ?? "").padEnd(30)) +
+    chalk.gray(`${item.goodsNo || "-"}`.padEnd(16)) +
+    chalk.gray(`${item.size || "-"}`.padEnd(10)) +
+    chalk.green(`¥${item.price}`.padStart(8)) +
+    chalk.gray("  " + xyStatus) +
+    (xyPrice ? chalk.gray(`  ${xyPrice}`) : ""),
+  );
 }

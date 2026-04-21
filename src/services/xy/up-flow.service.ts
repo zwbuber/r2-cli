@@ -5,6 +5,7 @@
 
 import { select, input, confirm, checkbox } from "@inquirer/prompts";
 import chalk from "chalk";
+import ora from "ora";
 import { getXianyuApi } from "./xianyu-api.service.js";
 import type {
   XyShop,
@@ -18,7 +19,7 @@ import type {
   StuffLevel,
 } from "../../types/xianyu.js";
 import { STUFF_LABELS, ITEM_BIZ_TYPES } from "../../types/xianyu.js";
-import cityData from "../../common/citys.json" with { type: "json" };
+import cityData from "./citys.json" with { type: "json" };
 
 export interface UpOptions {
   shop?: string;
@@ -71,8 +72,9 @@ export class UpFlowService {
     }
 
     // 获取商品详情
-    console.log(chalk.cyan("  获取商品信息..."));
+    const detailSpinner = ora("获取商品信息...").start();
     const goodsDetail = await this.api.getXyGoodsInfo(selectedId, shop.thirdUserId);
+    detailSpinner.succeed("商品信息已获取");
 
     // 步骤 3: 填写上架信息
     stepHeader(3, "填写上架信息");
@@ -127,7 +129,7 @@ export class UpFlowService {
 
   private async selectProduct(): Promise<{ id: string; item: SellerGoodsItem } | null> {
     stepHeader(1, "选择商品");
-    console.log(chalk.cyan("  加载商品列表..."));
+    const spinner = ora("加载商品列表...").start();
 
     let page = 1;
     const allItems: SellerGoodsItem[] = [];
@@ -141,9 +143,10 @@ export class UpFlowService {
     }
 
     if (!allItems.length) {
-      console.log(chalk.yellow("  没有可上架的商品（未同步到闲鱼）"));
+      spinner.warn("没有可上架的商品（未同步到闲鱼）");
       return null;
     }
+    spinner.succeed(`加载 ${allItems.length} 个待同步商品`);
 
     const selected = await select({
       message: "请选择要上架的商品",
@@ -289,9 +292,10 @@ export class UpFlowService {
       return { categoryId: preferredCatId, channelCatId: preferredChannelCatId };
     }
 
-    console.log(chalk.cyan("  加载类目..."));
+    const catSpinner = ora("加载类目...").start();
     const categories = await this.api.getCategories(16);
     const groups = this.groupCategories(categories);
+    catSpinner.succeed(`加载 ${categories.length} 个类目`);
 
     const group = await select({
       message: "选择分类",
@@ -327,9 +331,10 @@ export class UpFlowService {
   }
 
   private async selectProps(channelCatId: string, detail: XyGoodsDetail): Promise<ItemAttr[]> {
-    console.log(chalk.cyan("  加载属性..."));
+    const propsSpinner = ora("加载属性...").start();
     const props = await this.api.getProps(channelCatId);
-    if (!props.length) return [];
+    if (!props.length) { propsSpinner.warn("无属性"); return []; }
+    propsSpinner.succeed(`加载 ${props.length} 个属性`);
 
     const stuffMap: Record<string, string> = {
       "100": "全新", "-1": "全新", "99": "几乎全新",

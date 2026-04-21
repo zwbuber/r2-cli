@@ -45,7 +45,7 @@ function setupCliApp(): Command {
     },
   });
 
-  // 仅在无子命令时显示欢迎信息（交互模式）
+  // 仅在无子命令时显示欢迎信息
   program.action(() => {
     displayWelcomeMessage();
     program.help();
@@ -63,6 +63,12 @@ function setupCliApp(): Command {
 
   return program;
 }
+
+// SIGINT 优雅退出
+process.on("SIGINT", () => {
+  console.log(chalk.gray("\n操作已取消"));
+  process.exit(130);
+});
 
 const program = setupCliApp();
 program.parse(process.argv);

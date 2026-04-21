@@ -7,9 +7,10 @@ import { ApiError, AuthError } from "../../errors/index.js";
 import type { GenerateQRCodeData, QRCodeStatusData } from "../../types/auth.js";
 
 /**
- * API 基础地址 - 构建时通过 esbuild --define 替换
+ * API 基础地址 - 构建时通过 esbuild define 替换 process.env.R2_API_URL
+ * dev 模式下 tsx 不做替换，需要兜底值
  */
-const R2_API_URL = "https://api.qiuxietang.com";
+const R2_API_URL: string = process.env.R2_API_URL || "https://api.qiuxietang.com";
 
 /**
  * API 客户端服务实现
