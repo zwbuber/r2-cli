@@ -11,6 +11,7 @@ import { createReportCommand } from "./business/report.js";
 import { createRiskCommand } from "./inventory/risk.js";
 import { createChatCommand } from "./ai/chat.js";
 import { createSkillsCommand } from "./ai/skills.js";
+import { createXyCommand } from "./xy/index.js";
 
 /** 未实现命令的统一提示 */
 function notImplemented(name: string): void {
@@ -65,6 +66,9 @@ export function setupCommands(program: Command): void {
   const aiCommand = program.command("ai").description("AI 相关功能");
   aiCommand.addCommand(createChatCommand());
   aiCommand.addCommand(createSkillsCommand());
+
+  // ==================== 闲鱼管理命令 ====================
+  program.addCommand(createXyCommand());
 
   // ==================== 竞价模拟命令 ====================
   program

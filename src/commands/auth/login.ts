@@ -17,10 +17,10 @@ import { type IQRCodeAuthApi, ApiClientService, QRCodeAuthApiService } from "../
 import { createStorageService, StorageService } from "../../services/storage/index.js";
 import { AuthError, PollingError } from "../../errors/index.js";
 
-// 动态导入 qrcode-terminal（CommonJS）
+// 动态导入 qrcode（CommonJS）
 import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
-const qrcodeTerminal = require("qrcode-terminal");
+const QRCode = require("qrcode");
 
 // ==================== 登录服务 ====================
 
@@ -117,11 +117,14 @@ class LoginService {
   private displayQRCode(qrData: GenerateQRCodeData): void {
     console.log(chalk.yellow("📱 请使用 第二回合APP 扫描二维码登录\n"));
 
-    // 使用 qrcode-terminal 显示二维码
-    qrcodeTerminal.generate(`r2://auth/login?qrToken=${qrData.qrContent}`, { small: true });
+    // 使用 qrcode 显示二维码
+    // QRCode.toString(`r2://auth/login?qrToken=${qrData.qrContent}`, { small: true });
+    QRCode.toString(`r2://auth/login?qrToken=${qrData.qrContent}`, { type: "terminal" }, function (err: any, url: any) {
+      console.log(url);
+    });
 
-    const expireTimeMs = Number.parseInt(qrData.expireTime, 10);
-    const pollIntervalMs = Number.parseInt(qrData.pollInterval, 10);
+    // const expireTimeMs = Number.parseInt(qrData.expireTime, 10);
+    // const pollIntervalMs = Number.parseInt(qrData.pollInterval, 10);
 
     // console.log(chalk.gray("\n二维码内容: ") + chalk.white(qrData.qrContent));
     // console.log(chalk.gray("过期时间: ") + chalk.white(`${expireTimeMs / 1000} 秒`));

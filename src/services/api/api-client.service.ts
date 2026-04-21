@@ -3,7 +3,7 @@
  */
 
 import type { IApiClient, IQRCodeAuthApi, ApiConfig, RequestConfig, ApiResponse } from "./api-client.interface.js";
-import { ApiError } from "../../errors/index.js";
+import { ApiError, AuthError } from "../../errors/index.js";
 import type { GenerateQRCodeData, QRCodeStatusData } from "../../types/auth.js";
 
 /**
@@ -41,6 +41,13 @@ export class ApiClientService implements IApiClient {
   }
 
   /**
+   * 检查是否已设置 token
+   */
+  isTokenSet(): boolean {
+    return this.token !== null;
+  }
+
+  /**
    * 构建 URL
    */
   private buildUrl(path: string): string {
@@ -68,6 +75,9 @@ export class ApiClientService implements IApiClient {
    */
   private async handleResponse<T>(response: Response): Promise<T> {
     if (!response.ok) {
+      if (response.status === 401) {
+        throw new AuthError("登录已过期或未登录，请运行 r2 auth login");
+      }
       const errorText = await response.text();
       throw new ApiError(`HTTP ${response.status}: ${response.statusText} - ${errorText}`, response.status);
     }

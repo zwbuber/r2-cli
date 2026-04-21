@@ -17,7 +17,7 @@ const apiUrl = process.env.R2_API_URL || 'https://api.qiuxietang.com';
 
 // 入口点配置
 const entryPoints = {
-  cli: 'src/entrypoints/cli.ts',
+  cli: 'src/entrypoints/cli.tsx',
 };
 
 // esbuild 配置
@@ -32,7 +32,13 @@ const esbuildConfig = {
     'chalk',
     'figlet',
     'fs-extra',
-    'inquirer',
+    '@inquirer/prompts',
+    '@inquirer/core',
+    '@inquirer/input',
+    '@inquirer/select',
+    '@inquirer/confirm',
+    '@inquirer/checkbox',
+    'mute-stream',
     'open',
     'qrcode-terminal',
     'mammoth',
